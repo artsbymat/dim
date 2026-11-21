@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Dim</string>
+    <string name="accessibility_name">Dim · Filter layar</string>
+    <string name="accessibility_description">Menampilkan filter layar termasuk di panel notifikasi pada perangkat yang mendukungnya. Dim mengambil tangkapan layar hanya saat Anda mengetuk tile Tangkapan bersih.</string>
+    <string name="tile_filter">Filter Dim</string>
+    <string name="tile_automatic">Dim otomatis</string>
+    <string name="tile_screenshot">Tangkapan bersih</string>
+    <string name="capture_failed">Tangkapan layar tidak dapat disimpan.</string>
+    <string name="capture_saved">Tangkapan disimpan di Pictures/Dim.</string>
+</resources>
