@@ -47,7 +47,7 @@ APK dan AAB bertanda tangan tersedia di `app/build/outputs/apk/release/` dan `ap
 
 ### GitHub Actions
 
-Workflow **Android CI** menjalankan build debug, tes unit, dan lint pada push dan pull request. Setelah pemeriksaan lulus untuk tag `v*`, workflow membuat APK dan AAB bertanda tangan dan melampirkan keduanya di **Releases → Assets**. Jika rilis sudah ada, workflow menambahkan file yang belum ada. **Run workflow** membuat paket bertanda tangan yang bisa diunduh dari **Artifacts → dim-release**.
+Workflow **Android CI** menjalankan build debug, tes unit, dan lint pada push dan pull request. Setelah pemeriksaan lulus untuk tag `v*`, workflow membuat APK dan AAB bertanda tangan lalu memublikasikan keduanya di **Releases → Assets**. Jika draf untuk tag itu sudah ada, workflow melengkapi asetnya sebelum memublikasikannya. **Run workflow** membuat paket bertanda tangan yang bisa diunduh dari **Artifacts → dim-release**.
 
 Tambahkan dua repository secrets di **Settings → Secrets and variables → Actions**.
 

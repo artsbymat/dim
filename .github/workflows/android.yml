@@ -92,13 +92,17 @@ jobs:
             fi
           done
 
-          if assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"; then
+          if release="$(gh release view "$RELEASE_TAG" --json assets,isDraft)"; then
+            assets="$(jq -r '.assets[].name' <<< "$release")"
             for package in "${packages[@]}"; do
               if ! grep -Fxq -- "${package##*/}" <<< "$assets"; then
                 gh release upload "$RELEASE_TAG" "$package"
               fi
             done
+            if [[ "$(jq -r '.isDraft' <<< "$release")" == true ]]; then
+              gh release edit "$RELEASE_TAG" --verify-tag --draft=false
+            fi
           else
             gh release create "$RELEASE_TAG" "${packages[@]}" \
-              --verify-tag --title "Dim $RELEASE_TAG" --generate-notes
+              --verify-tag --draft=false --title "Dim $RELEASE_TAG" --generate-notes
           fi
