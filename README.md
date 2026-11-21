@@ -47,11 +47,18 @@ APK dan AAB bertanda tangan tersedia di `app/build/outputs/apk/release/` dan `ap
 
 ### GitHub Actions
 
-Workflow **Android CI** menjalankan build debug, tes unit, dan lint pada push dan pull request. Push tag `v*` atau **Run workflow** juga membuat APK dan AAB bertanda tangan setelah pemeriksaan CI lulus. Unduh keduanya dari **Artifacts → dim-release** pada halaman run.
+Workflow **Android CI** menjalankan build debug, tes unit, dan lint pada push dan pull request. Setelah pemeriksaan lulus untuk tag `v*`, workflow membuat APK dan AAB bertanda tangan dan melampirkan keduanya di **Releases → Assets**. Jika rilis sudah ada, workflow menambahkan file yang belum ada. **Run workflow** membuat paket bertanda tangan yang bisa diunduh dari **Artifacts → dim-release**.
 
 Tambahkan dua repository secrets di **Settings → Secrets and variables → Actions**.
 
 - `ANDROID_KEYSTORE_BASE64` berisi hasil `base64 < path/to/release.jks`.
 - `ANDROID_KEYSTORE_PROPERTIES` berisi baris `storePassword`, `keyAlias`, dan `keyPassword` dalam format yang sama dengan `keystore.properties`, beserta `storeType` jika diperlukan. Workflow mengisi `storeFile` sementara.
 
-Tag memicu packaging. Versi aplikasi tetap mengikuti `versionCode` dan `versionName` di `app/build.gradle.kts`.
+Untuk merilis versi berikutnya, perbarui `versionCode` dan `versionName` di `app/build.gradle.kts`, lalu commit dan push perubahan. Buat dan push tag dari commit tersebut, misalnya.
+
+```sh
+git tag -a v1.0.1 -m "Dim v1.0.1"
+git push origin v1.0.1
+```
+
+Tag yang sudah ada memakai workflow dari commit yang ditandai.
