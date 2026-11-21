@@ -81,9 +81,15 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          packages=(release/app-release.apk release/app-release.aab)
+          packages=(
+            release/apk/release/app-release.apk
+            release/bundle/release/app-release.aab
+          )
           for package in "${packages[@]}"; do
-            test -s "$package"
+            if [[ ! -s "$package" ]]; then
+              printf '::error::Missing or empty release package: %s\n' "$package"
+              exit 1
+            fi
           done
 
           if assets="$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name')"; then
