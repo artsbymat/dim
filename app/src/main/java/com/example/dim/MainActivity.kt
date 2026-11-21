@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
@@ -94,7 +95,6 @@ class MainActivity : ComponentActivity() {
         var automatic by remember { mutableStateOf(DimSettings.automatic(this)) }
         var opacity by remember { mutableIntStateOf(DimSettings.opacity(this)) }
         val connected = DimSettings.connected
-        val effectiveOpacity = DimSettings.appliedOpacity
         val failed = DimSettings.overlayFailed
 
         DisposableEffect(Unit) {
@@ -119,23 +119,16 @@ class MainActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     Text("Dim", style = MaterialTheme.typography.headlineLarge)
-                    Text(
-                        when {
-                            !connected -> "Aktifkan layanan Aksesibilitas Dim untuk meredupkan layar, termasuk panel notifikasi pada perangkat yang mendukungnya."
-                            failed -> "Filter gagal ditampilkan. Jeda filter lalu coba aktifkan kembali."
-                            !enabled -> "Filter dijeda"
-                            else -> "Filter aktif · $effectiveOpacity%"
-                        },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    val status = when {
+                        !connected -> "Aktifkan layanan Aksesibilitas Dim untuk meredupkan layar, termasuk panel notifikasi pada perangkat yang mendukungnya."
+                        failed -> "Filter gagal ditampilkan. Jeda filter lalu coba aktifkan kembali."
+                        else -> null
+                    }
+                    status?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     if (!connected) {
                         Text("Layanan juga mengambil tangkapan layar ketika Anda mengetuk tile Tangkapan bersih.")
                         Button(onClick = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }) {
                             Text("Buka pengaturan Aksesibilitas")
-                        }
-                    } else {
-                        Button(onClick = { DimSettings.setEnabled(this@MainActivity, !enabled) }) {
-                            Text(if (enabled) "Jeda filter" else "Aktifkan filter")
                         }
                     }
 
@@ -148,6 +141,17 @@ class MainActivity : ComponentActivity() {
                             }
                             Text("Pratinjau warna", style = MaterialTheme.typography.labelLarge)
                             ColorPreview(if (connected && enabled && !failed) 0 else opacity)
+                            if (connected) {
+                                Button(
+                                    onClick = { DimSettings.setEnabled(this@MainActivity, !enabled) },
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                                ) {
+                                    Text(
+                                        if (enabled) "Jeda filter" else "Aktifkan filter",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+                            }
                         }
                     }
                     Row(

@@ -40,7 +40,18 @@ keyPassword=
 ```
 
 ```sh
-./gradlew :app:assembleRelease :app:bundleRelease
+./scripts/package-release.sh
 ```
 
-APK dan AAB bertanda tangan tersedia di `app/build/outputs/apk/release/` dan `app/build/outputs/bundle/release/`. Jika `keystore.properties` tidak tersedia, build debug tetap berjalan dan artefak rilis dibuat tanpa tanda tangan.
+APK dan AAB bertanda tangan tersedia di `app/build/outputs/apk/release/` dan `app/build/outputs/bundle/release/`. Skrip berhenti jika `keystore.properties` belum tersedia.
+
+### GitHub Actions
+
+Workflow **Android CI** menjalankan build debug, tes unit, dan lint pada push dan pull request. Push tag `v*` atau **Run workflow** juga membuat APK dan AAB bertanda tangan setelah pemeriksaan CI lulus. Unduh keduanya dari **Artifacts → dim-release** pada halaman run.
+
+Tambahkan dua repository secrets di **Settings → Secrets and variables → Actions**.
+
+- `ANDROID_KEYSTORE_BASE64` berisi hasil `base64 < path/to/release.jks`.
+- `ANDROID_KEYSTORE_PROPERTIES` berisi baris `storePassword`, `keyAlias`, dan `keyPassword` dalam format yang sama dengan `keystore.properties`, beserta `storeType` jika diperlukan. Workflow mengisi `storeFile` sementara.
+
+Tag memicu packaging. Versi aplikasi tetap mengikuti `versionCode` dan `versionName` di `app/build.gradle.kts`.

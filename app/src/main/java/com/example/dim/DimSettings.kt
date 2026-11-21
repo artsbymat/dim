@@ -12,7 +12,6 @@ internal const val MAX_OPACITY = 90
 
 internal object DimSettings {
     var connected by mutableStateOf(false)
-    var appliedOpacity by mutableStateOf(0)
     var overlayFailed by mutableStateOf(false)
 
     fun preferences(context: Context) = context.getSharedPreferences("dim", Context.MODE_PRIVATE)

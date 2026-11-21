@@ -1,0 +1,61 @@
+name: Android CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Install Android SDK 37
+        run: |
+          if [[ ! -f "$ANDROID_HOME/platforms/android-37.0/android.jar" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0"
+          fi
+
+      - name: Build, test, and lint
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+
+      - name: Package signed release
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PROPERTIES: ${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}
+        run: |
+          set -euo pipefail
+          : "${ANDROID_KEYSTORE_BASE64:?Set ANDROID_KEYSTORE_BASE64 in GitHub Actions secrets}"
+          : "${ANDROID_KEYSTORE_PROPERTIES:?Set ANDROID_KEYSTORE_PROPERTIES in GitHub Actions secrets}"
+          umask 077
+          trap 'rm -f -- .ci-release.jks keystore.properties' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > .ci-release.jks
+          printf '%s\nstoreFile=.ci-release.jks\n' "$ANDROID_KEYSTORE_PROPERTIES" > keystore.properties
+          unset ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PROPERTIES
+          ./scripts/package-release.sh
+
+      - name: Upload release packages
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dim-release
+          if-no-files-found: error
+          path: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/bundle/release/app-release.aab

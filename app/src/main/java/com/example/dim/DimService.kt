@@ -69,7 +69,6 @@ class DimService : AccessibilityService(), SensorEventListener {
         val existing = overlay
         if (existing != null) {
             existing.alpha = opacity / 100f
-            DimSettings.appliedOpacity = opacity
             return
         }
 
@@ -104,7 +103,6 @@ class DimService : AccessibilityService(), SensorEventListener {
         try {
             windows.addView(layer, params)
             overlay = layer
-            DimSettings.appliedOpacity = opacity
             DimSettings.overlayFailed = false
         } catch (error: WindowManager.BadTokenException) {
             Log.w("Dim", "Overlay token unavailable", error)
@@ -115,7 +113,6 @@ class DimService : AccessibilityService(), SensorEventListener {
     private fun removeOverlay() {
         overlay?.let(windows::removeViewImmediate)
         overlay = null
-        DimSettings.appliedOpacity = 0
     }
 
     internal fun capture() {
